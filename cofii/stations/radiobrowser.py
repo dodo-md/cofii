@@ -1,8 +1,8 @@
-from traceback import print_tb
 import httpx
 
 BASE = "https://de1.api.radio-browser.info"
 HEADERS = {"User-Agent": "cofii/0.1.0"}
+
 
 def search_lofi(limit: int = 20) -> list[dict]:
     r = httpx.get(

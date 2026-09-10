@@ -1,11 +1,33 @@
 [project]
 name = "cofii"
 version = "0.1.0"
-description = "Add your description here"
+description = "Terminal lofi radio for developers — coffee + lofi"
 readme = "README.md"
-requires-python = ">=3.14"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "doruk" }]
+keywords = ["lofi", "radio", "terminal", "tui", "mpv"]
 dependencies = [
     "httpx>=0.28.1",
-    "mpv>=1.0.8",
     "textual>=8.2.8",
 ]
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio :: Players",
+]
+
+[project.urls]
+Homepage = "https://github.com/dodo-md/cofii"
+Repository = "https://github.com/dodo-md/cofii"
+
+[project.scripts]
+cofii = "cofii.app:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cofii"]

@@ -1,10 +1,10 @@
 from textual.app import App, ComposeResult
-from textual.containers import Container
 from textual.binding import Binding
+from textual.containers import Container
 from textual.widgets import Static
 
-from stations.radiobrowser import search_lofi
-from player.mpv import Player
+from cofii.player.mpv import Player
+from cofii.stations.radiobrowser import search_lofi
 
 
 class CofiiApp(App):
