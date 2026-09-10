@@ -1,56 +1,81 @@
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, Vertical
-from textual.widgets import Header, Footer, OptionList, Static
-from textual.widgets.option_list import Option
+from textual.containers import Container
+from textual.binding import Binding
+from textual.widgets import Static
 
 from stations.radiobrowser import search_lofi
 from player.mpv import Player
 
+
 class CofiiApp(App):
     CSS = """
-    #stations { width: 42; border: solid green; }
-    #now { border: solid green; }
+    Screen {
+        align: center middle;
+    }
+
+    #panel {
+        width: 56;
+        height: auto;
+        border: round #c4a574;
+        padding: 1 2;
+        color: #e8e0d5;
+    }
+
+    #panel .hint {
+        color: #8a7f72;
+    }
     """
 
-    BINDINGS = [("q", "quit", "Quit")]
+    BINDINGS = [
+        Binding("q", "quit", "Quit", show=False),
+        Binding("up", "prev_station", "Prev", show=False),
+        Binding("down", "next_station", "Next", show=False),
+    ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.player = Player()
         self.stations = search_lofi(10)
+        self.index = 0
 
     def compose(self) -> ComposeResult:
-        yield Header()
-        with Horizontal():
-            yield OptionList(id="stations")
-            with Vertical(id="now"):
-                yield Static("cofii", id="title")
-                yield Static("—", id="current")
-        yield Footer()
+        with Container(id="panel"):
+            yield Static("", id="status")
+            yield Static("↑↓ change station · q quit", classes="hint")
 
     def on_mount(self) -> None:
-        ol = self.query_one("#stations", OptionList)
-        for s in self.stations:
-            ol.add_option(Option(s["name"]))
-        ol.focus()
-        self._play_index(0)
+        if self.stations:
+            self._play_index(0)
 
-    def on_option_list_option_highlighted(self, event: OptionList.OptionHighlighted) -> None:
-        # ok tuşuyla gezerken burası tetiklenir
-        self._play_index(event.option_index)
+    def action_prev_station(self) -> None:
+        if not self.stations:
+            return
+        self._play_index((self.index - 1) % len(self.stations))
+
+    def action_next_station(self) -> None:
+        if not self.stations:
+            return
+        self._play_index((self.index + 1) % len(self.stations))
 
     def _play_index(self, i: int) -> None:
         if not (0 <= i < len(self.stations)):
             return
-        s = self.stations[i]
-        self.player.play(s["url_resolved"])
-        self.query_one("#current", Static).update(s["name"])
+        self.index = i
+        station = self.stations[i]
+        self.player.play(station["url_resolved"])
+        n = i + 1
+        total = len(self.stations)
+        self.query_one("#status", Static).update(
+            f"Playing: {station['name']}\n[{n}/{total}]"
+        )
 
     def on_unmount(self) -> None:
         self.player.stop()
 
-def main():
+
+def main() -> None:
     CofiiApp().run()
+
 
 if __name__ == "__main__":
     main()
