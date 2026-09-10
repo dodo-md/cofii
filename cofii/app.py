@@ -30,6 +30,7 @@ class CofiiApp(App):
     """
 
     BINDINGS = [
+        Binding("p", "toggle_pause", "Pause", show=False),
         Binding("q", "quit", "Quit", show=False),
         Binding("up", "prev_station", "Prev", show=False),
         Binding("down", "next_station", "Next", show=False),
@@ -48,11 +49,17 @@ class CofiiApp(App):
         with Container(id="panel") as panel:
             panel.border_title = "cofii"
             yield Static("", id="status")
-            yield Static("↑↓ change station · q quit", classes="hint")
+            yield Static("↑↓ change station · p pause · q quit", classes="hint")
 
     def on_mount(self) -> None:
         if self.stations:
             self._play_index(0)
+
+    def action_toggle_pause(self) -> None:
+        if not self.stations:
+            return
+        self.player.toggle()
+        self._update_status()
 
     def action_prev_station(self) -> None:
         if not self.stations:
@@ -99,11 +106,14 @@ class CofiiApp(App):
         self.index = i
         station = self.stations[i]
         self.player.play(station["url_resolved"])
-        n = i + 1
-        total = len(self.stations)
-        self.query_one("#status", Static).update(
-            f"playing: {station['name']}"
-        )
+        self._update_status()
+
+    def _update_status(self) -> None:
+        if not self.stations:
+            return
+        name = self.stations[self.index]["name"]
+        prefix = "paused" if self.player.paused else "playing"
+        self.query_one("#status", Static).update(f"{prefix}: {name}")
 
     def clear_terminal(self):
         os.system('cls' if os.name == 'nt' else 'clear')
