@@ -6,12 +6,12 @@ def main():
     for i, s in enumerate(stations, 1):
         print(f"{i}. {s['name']}")
 
-    choice = int(input("Seç: ")) - 1
+    choice = int(input("\nselect a radio: ")) - 1
     url = stations[choice]["url_resolved"]
 
     player = Player()
     player.play(url)
-    input("çalıyor… durdurmak için Enter")
+    input("playing... press Enter to stop")
     player.stop()
 
 if __name__ == "__main__":
