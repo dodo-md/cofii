@@ -11,7 +11,7 @@ def main():
 
     player = Player()
     player.play(url)
-    input("Çalıyor… durdurmak için Enter")
+    input("çalıyor… durdurmak için Enter")
     player.stop()
 
 if __name__ == "__main__":
