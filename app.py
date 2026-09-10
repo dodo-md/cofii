@@ -17,6 +17,8 @@ class CofiiApp(App):
         width: 56;
         height: auto;
         border: round #c4a574;
+        border-title-align: center;
+        border-title-color: #c4a574;
         padding: 1 2;
         color: #e8e0d5;
     }
@@ -39,7 +41,8 @@ class CofiiApp(App):
         self.index = 0
 
     def compose(self) -> ComposeResult:
-        with Container(id="panel"):
+        with Container(id="panel") as panel:
+            panel.border_title = "cofii"
             yield Static("", id="status")
             yield Static("↑↓ change station · q quit", classes="hint")
 
