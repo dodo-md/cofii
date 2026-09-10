@@ -38,8 +38,11 @@ class CofiiApp(App):
     def __init__(self) -> None:
         super().__init__()
         self.player = Player()
-        self.stations = search_lofi(10)
+        self.page_size = 10
+        self.offset = 0
+        self.stations = search_lofi(self.page_size, offset=0)
         self.index = 0
+        self.loading = False
 
     def compose(self) -> ComposeResult:
         with Container(id="panel") as panel:
@@ -54,12 +57,41 @@ class CofiiApp(App):
     def action_prev_station(self) -> None:
         if not self.stations:
             return
-        self._play_index((self.index - 1) % len(self.stations))
+        if self.index > 0:
+            self._play_index(self.index - 1)
+            return
+        if self.offset == 0:
+            return
+        if not self._load_page(self.offset - self.page_size):
+            return
+        self._play_index(len(self.stations) - 1)
+
 
     def action_next_station(self) -> None:
         if not self.stations:
             return
-        self._play_index((self.index + 1) % len(self.stations))
+        if self.index < len(self.stations) - 1:
+            self._play_index(self.index + 1)
+            return
+        if not self._load_page(self.offset + self.page_size):
+            return
+        self._play_index(0)
+
+    def _load_page(self, offset: int) -> bool:
+        if self.loading:
+            return False
+        self.loading = True
+        try:
+            batch = search_lofi(self.page_size, offset=offset)
+        finally:
+            self.loading = False
+
+        if not batch:
+            return False
+
+        self.stations = batch
+        self.offset = offset
+        return True
 
     def _play_index(self, i: int) -> None:
         if not (0 <= i < len(self.stations)):
@@ -70,7 +102,7 @@ class CofiiApp(App):
         n = i + 1
         total = len(self.stations)
         self.query_one("#status", Static).update(
-            f"Playing: {station['name']}\n[{n}/{total}]"
+            f"playing: {station['name']}"
         )
 
     def clear_terminal(self):
