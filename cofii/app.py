@@ -1,3 +1,4 @@
+import os
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container
@@ -72,7 +73,11 @@ class CofiiApp(App):
             f"Playing: {station['name']}\n[{n}/{total}]"
         )
 
+    def clear_terminal(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+
     def on_unmount(self) -> None:
+        self.clear_terminal()
         self.player.stop()
 
 
